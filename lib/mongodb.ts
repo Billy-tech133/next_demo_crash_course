@@ -47,6 +47,11 @@ export async function connectToDatabase(): Promise<Connection> {
       })
       .then((mongooseInstance) => {
         return mongooseInstance.connection;
+      })
+      .catch((error) => {
+        // Reset promise on failure so future retries can establish a new connection.
+        globalWithMongoose.mongoose.promise = null;
+        throw error;
       });
   }
 
