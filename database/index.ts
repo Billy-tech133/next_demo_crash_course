@@ -1,4 +1,5 @@
-import Event from './event.model';
+import IEvent from './event.model';
 import Booking from './booking.model';
 
-export { Event, Booking };
+export type { IEvent } from './event.model';
+// export type { Booking } from './booking.model';

@@ -43,7 +43,12 @@ export async function connectToDatabase(): Promise<Connection> {
     globalWithMongoose.mongoose.promise = mongoose
       .connect(uri, {
         // useNewUrlParser and useUnifiedTopology are default in mongoose v6+
-        // set other options if required
+        // Increase timeouts for slow/unreliable networks
+        serverSelectionTimeoutMS: 30000, // 30 seconds to find a server
+        socketTimeoutMS: 45000, // 45 seconds for socket operations
+        connectTimeoutMS: 10000, // 10 seconds initial connection attempt
+        retryWrites: true, // Already in URI but explicit here
+        maxPoolSize: 10,
       })
       .then((mongooseInstance) => {
         return mongooseInstance.connection;
