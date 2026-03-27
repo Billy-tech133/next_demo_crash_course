@@ -6,6 +6,9 @@ import { cacheLife } from 'next/cache';
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
 export default async function Home() {
+  'use cache';
+
+  cacheLife('hours');
   let events: IEvent[] = [];
 
   try {
@@ -33,9 +36,6 @@ export default async function Home() {
     events = [];
   }
 
-  ('use cache');
-
-  cacheLife('hours');
   return (
     <section>
       <h1 className="text-center">
