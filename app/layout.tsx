@@ -7,6 +7,7 @@ import { NextFont } from 'next/dist/compiled/@next/font';
 import Navbar from '@/components/Navbar';
 import { PHProvider } from '@/components/providers';
 import { PostHogPageView } from '@/components/PostHogPageView';
+import { Suspense } from 'react';
 
 const schibstedGrostesk = Schibsted_Grotesk({
   variable: '--font-schibsted-grotesk',
@@ -31,7 +32,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col min-h-screen">
         <PHProvider>
-          <PostHogPageView />
+          <Suspense fallback={null}>
+            <PostHogPageView />
+          </Suspense>
           <Navbar />
           <div className="absolute inset-0 top-0 z-[-1] min-h-screen">
             <LightRays
