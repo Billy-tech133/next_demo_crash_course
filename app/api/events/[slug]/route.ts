@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import Event from '@/database/event.model';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 interface Params {
   slug: string;
 }

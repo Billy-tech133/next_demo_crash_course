@@ -1,17 +1,33 @@
-import mongoose, { Connection } from 'mongoose';
-
 // MongoDB connection string from environment variable.
 // In Next.js, use NEXT_PUBLIC_ only for client-facing values; DB URIs should be private.
 const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!MONGODB_URI) {
-  throw new Error(
-    'Please define the MONGODB_URI environment variable inside .env.local'
-  );
-}
+// For build-time safety, only throw error if we're actually trying to connect
+// and the URI is missing. This prevents build failures when the env var
+// isn't set during static generation.
+let connection: Connection;
 
-// TypeScript assertion: after the nil guard above, this is guaranteed to be a string.
-const uri = MONGODB_URI as string;
+export const connectToDatabase = async (): Promise<Connection> => {
+  if (!MONGODB_URI) {
+    throw new Error(
+      'Please define the MONGODB_URI environment variable inside .env.local'
+    );
+  }
+
+  if (connection && mongoose.connection.readyState === 1) {
+    return connection;
+  }
+
+  try {
+    await mongoose.connect(MONGODB_URI);
+    connection = mongoose.connection;
+    console.log('Connected to MongoDB');
+    return connection;
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    throw error;
+  }
+};
 
 // Global cache to store connection across hot reloads in development.
 interface MongooseGlobal {

@@ -4,6 +4,9 @@ import Event from '@/database/event.model';
 import { v2 as cloudinary } from 'cloudinary';
 import { UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 // Configure Cloudinary with credentials from environment variables
 cloudinary.config({
   url: process.env.CLOUDINARY_URL,
