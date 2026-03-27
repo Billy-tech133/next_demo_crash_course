@@ -6,9 +6,7 @@ import { UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
 
 // Configure Cloudinary with credentials from environment variables
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  url: process.env.CLOUDINARY_URL,
 });
 
 export async function POST(request: NextRequest) {
@@ -38,15 +36,40 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const file = formData.get('image') as File;
+    const file = formData.get('image');
 
-    let tags = JSON.parse(formData.get('tags') as string);
-    let agenda = JSON.parse(formData.get('agenda') as string);
-
-    if (!file) {
+    if (!file || !(file instanceof File)) {
       return NextResponse.json(
         {
-          message: 'Image file is required',
+          message: 'Image file is required and must be a valid file',
+        },
+        { status: 400 }
+      );
+    }
+
+    let tags, agenda;
+
+    try {
+      const tagsData = formData.get('tags');
+      const agendaData = formData.get('agenda');
+
+      if (!tagsData || !agendaData) {
+        return NextResponse.json(
+          {
+            message: 'Tags and agenda are required',
+          },
+          { status: 400 }
+        );
+      }
+
+      tags = JSON.parse(tagsData as string);
+      agenda = JSON.parse(agendaData as string);
+    } catch (e) {
+      console.error('Error parsing tags or agenda:', e);
+      return NextResponse.json(
+        {
+          message: 'Invalid tags or agenda format',
+          error: e instanceof Error ? e.message : 'Unknown error',
         },
         { status: 400 }
       );
@@ -86,6 +109,7 @@ export async function POST(request: NextRequest) {
       'description',
       'overview',
       'image',
+      'venue',
       'date',
       'time',
       'location',
@@ -100,10 +124,10 @@ export async function POST(request: NextRequest) {
       Object.entries(event).filter(([key]) => allowedFields.includes(key))
     );
 
-    const createdEvent = await Event.create(eventPayload, {
-      ...event,
-      tags: tags,
-      agenda: agenda,
+    const createdEvent = await Event.create({
+      ...eventPayload,
+      tags,
+      agenda,
     });
 
     return NextResponse.json(
